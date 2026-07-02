@@ -97,25 +97,47 @@ BMS_JS = r"""
 IG_JS = r"""
 () => {
     const og = s => { const el = document.querySelector(`meta[property="${s}"]`); return el ? el.getAttribute('content') || '' : ''; };
+    const isCDN = s => s && (s.includes('cdninstagram') || s.includes('fbcdn'));
 
-    // 1. Best: largest image inside the post article element
+    // Parse srcset string → [{src, w}] sorted by width descending
+    function parseSrcset(ss) {
+        return (ss || '').split(',').map(e => {
+            const p = e.trim().split(/\s+/);
+            return { src: p[0], w: parseInt(p[1]) || 0 };
+        }).filter(e => isCDN(e.src)).sort((a, b) => b.w - a.w);
+    }
+
     let imgUrl = '';
-    const articleImgs = Array.from(document.querySelectorAll('article img[src], div[role="dialog"] img[src]'))
-        .map(i => ({ src: i.src, w: i.naturalWidth || 0, h: i.naturalHeight || 0 }))
-        .filter(i => (i.src.includes('cdninstagram') || i.src.includes('fbcdn')) && i.w > 200 && i.h > 200);
-    articleImgs.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-    if (articleImgs.length) imgUrl = articleImgs[0].src;
+    let bestW  = 0;
 
-    // 2. Fallback: og:image meta tag
+    // 1. Highest-res image from srcset inside article / dialog
+    for (const img of document.querySelectorAll('article img, div[role="dialog"] img')) {
+        const entries = parseSrcset(img.srcset || img.getAttribute('srcset'));
+        if (entries.length && entries[0].w > bestW) {
+            bestW  = entries[0].w;
+            imgUrl = entries[0].src;
+        }
+        // Also consider the src itself
+        const w = img.naturalWidth || 0;
+        if (!entries.length && isCDN(img.src) && w > bestW && w > 200) {
+            bestW  = w;
+            imgUrl = img.src;
+        }
+    }
+
+    // 2. Fallback: og:image
     if (!imgUrl) imgUrl = og('og:image');
 
-    // 3. Last resort: any large cdninstagram image on the page
+    // 3. Last resort: any large CDN image anywhere on the page
     if (!imgUrl) {
-        const allImgs = Array.from(document.querySelectorAll('img[src]'))
-            .map(i => ({ src: i.src, w: i.naturalWidth || 0, h: i.naturalHeight || 0 }))
-            .filter(i => (i.src.includes('cdninstagram') || i.src.includes('fbcdn')) && i.w > 300);
-        allImgs.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-        if (allImgs.length) imgUrl = allImgs[0].src;
+        let best = { src: '', w: 0 };
+        for (const img of document.querySelectorAll('img[src]')) {
+            const entries = parseSrcset(img.srcset || img.getAttribute('srcset'));
+            if (entries.length && entries[0].w > best.w) best = entries[0];
+            const w = img.naturalWidth || 0;
+            if (!entries.length && isCDN(img.src) && w > best.w) best = { src: img.src, w };
+        }
+        if (best.src) imgUrl = best.src;
     }
 
     return {
@@ -166,7 +188,7 @@ async def _ig_fetch(url):
         )
         page = await ctx.new_page()
         await page.goto(url, wait_until='domcontentloaded', timeout=30000)
-        await page.wait_for_timeout(7000)
+        await page.wait_for_timeout(9000)
         for sel in ['button:has-text("Not Now")', 'button:has-text("Not now")', '[aria-label="Close"]']:
             try:
                 btn = page.locator(sel).first
@@ -198,13 +220,19 @@ async def _ig_fetch(url):
                 if img_b64:
                     (IMG_DIR / fn).write_bytes(_b64.b64decode(img_b64))
                     img_local = f"images/{fn}"
+                    print(f"  Image saved via fetch(): {len(_b64.b64decode(img_b64))} bytes")
                 else:
-                    # Fallback: open a new page (old behaviour)
+                    # Fallback: open a new page with the original URL
+                    print("  fetch() returned null — falling back to new page")
                     p2   = await ctx.new_page()
                     resp = await p2.goto(raw['imgUrl'], timeout=20000)
                     if resp and resp.status == 200:
-                        (IMG_DIR / fn).write_bytes(await resp.body())
+                        body = await resp.body()
+                        (IMG_DIR / fn).write_bytes(body)
                         img_local = f"images/{fn}"
+                        print(f"  Image saved via new page: {len(body)} bytes")
+                    else:
+                        print(f"  New page also failed: status {resp.status if resp else 'no response'}")
                     await p2.close()
             except Exception as e:
                 print(f"Image download warning: {e}")
@@ -212,17 +240,93 @@ async def _ig_fetch(url):
         await ctx.close()
 
     caption = raw.get('caption', '')
-    dm  = re.search(r'\b(\d{1,2}[\s/\-](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:[\s,]+\d{4})?)', caption, re.I)
-    vm  = re.search(r'(?:📍|venue|location|at\s+the|at\s+)[:\s]+([^\n|,📅🕐💰]{3,80})', caption, re.I)
-    tm  = re.search(r'\b(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm))', caption)
-    pm  = re.search(r'(?:₹|Rs\.?)\s*([\d,]+)', caption)
+
+    _MONTH = r'(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
+    _DAY   = r'\d{1,2}(?:st|nd|rd|th)?'
+    _YEAR  = r'(?:,?\s*20\d\d)?'
+    _DOW   = r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)(?:day)?'
+
+    # ── Date ─────────────────────────────────────────────────────────
+    date = ''
+    for pat in [
+        rf'\b({_DAY}\s*(?:&|and|to|-)\s*{_DAY}\s+{_MONTH}\w*{_YEAR})',   # 4th & 5th July
+        rf'\b({_DOW}\.?,?\s+{_DAY}\s+{_MONTH}\w*{_YEAR})',               # Sat, 4 Jul 2026
+        rf'\b({_DAY}\s+{_MONTH}\w*{_YEAR})',                             # 4th July 2026
+        rf'\b({_MONTH}\w*\s+{_DAY}{_YEAR})',                             # July 4, 2026
+    ]:
+        m = re.search(pat, caption, re.I)
+        if m:
+            date = m.group(1).strip()
+            break
+
+    # ── Time ─────────────────────────────────────────────────────────
+    time = ''
+    for pat in [
+        r'(?:time|timing|timings|starts?|begins?|from|🕐)[:\s–-]+(\d{1,2}(?::\d{2})?\s*(?:AM|PM))',
+        r'\b(\d{1,2}:\d{2}\s*(?:AM|PM))',
+        r'\b(\d{1,2}\s*(?:AM|PM))\b',
+        r'\b((?:0?\d|1\d|2[0-3]):[0-5]\d)\b',   # 24h fallback
+    ]:
+        m = re.search(pat, caption, re.I)
+        if m:
+            t = m.group(1).strip()
+            # Convert 24h → 12h
+            t24 = re.match(r'^(\d{1,2}):(\d{2})$', t)
+            if t24:
+                h, mn = int(t24.group(1)), int(t24.group(2))
+                t = f"{h % 12 or 12}:{mn:02d} {'AM' if h < 12 else 'PM'}"
+            # Normalise "7 PM" → "7:00 PM"
+            tl = re.match(r'^(\d{1,2})\s*(AM|PM)$', t, re.I)
+            if tl:
+                t = f"{tl.group(1)}:00 {tl.group(2).upper()}"
+            time = t
+            break
+
+    # ── Venue ────────────────────────────────────────────────────────
+    venue = ''
+    for pat in [
+        r'📍\s*([^\n📅🕐💰✉📧]{4,100})',
+        r'(?:where|venue|location)[:\s]+([^\n|📅🕐💰✉📧]{4,100})',
+        r'(?:at\s+the|taking place at|held at|happening at)\s+([A-Z][^\n|,📅🕐💰✉📧]{4,80})',
+        r'(?:at\s+)([A-Z][A-Za-z\s]{4,60}(?:,\s*[A-Z][a-z]+)?)',
+    ]:
+        m = re.search(pat, caption, re.I)
+        if m:
+            v = m.group(1).strip().rstrip('.,')
+            v = re.split(r'\s*[|]\s*', v)[0].strip()
+            if len(v) > 3:
+                venue = v
+                break
+
+    # ── Price ────────────────────────────────────────────────────────
+    price = ''
+    if re.search(r'\bfree\s*(?:entry|event|show|for\s+all|pass|registration|admission|access)?\b|\bentry[\s:]+free\b|\bno\s+entry\s+fee\b', caption, re.I):
+        price = 'Free'
+    else:
+        m = re.search(r'(?:₹|Rs\.?|INR)\s*([\d,]+)', caption)
+        if m:
+            price = m.group(1).replace(',', '')
+
+    # ── Email ────────────────────────────────────────────────────────
+    email = ''
+    m = re.search(r'\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b', caption)
+    if m:
+        email = m.group(1)
+
+    # ── Duration ─────────────────────────────────────────────────────
+    duration = ''
+    m = re.search(r'(\d+\.?\d*\s*(?:hours?|hrs?|minutes?|mins?)(?:\s+\d+\s*(?:minutes?|mins?))?)', caption, re.I)
+    if m:
+        duration = m.group(1).strip()
 
     return {
         'title':        raw.get('title', ''),
-        'date':         dm.group(1).strip() if dm else '',
-        'time':         tm.group(1)         if tm else '',
-        'venue':        vm.group(1).strip() if vm else '',
-        'price':        pm.group(1)         if pm else '',
+        'date':         date,
+        'time':         time,
+        'venue':        venue,
+        'price':        price,
+        'email':        email,
+        'duration':     duration,
         'link':         url,
         'image':        img_local,
         'caption_full': caption,
@@ -562,9 +666,14 @@ header{background:#1A1A2E;color:#fff;padding:0 28px;height:60px;display:flex;ali
           <div class="wa-hint" id="waHint"></div>
         </div>
 
-        <div class="field full">
+        <div class="field">
           <label>Registration Form Link</label>
-          <input type="url" id="fFormLink" placeholder="https://forms.google.com/... or any registration URL">
+          <input type="url" id="fFormLink" placeholder="https://forms.google.com/...">
+        </div>
+
+        <div class="field">
+          <label>Contact Email</label>
+          <input type="email" id="fEmail" placeholder="e.g. hello@example.com">
         </div>
 
         <div class="field full">
@@ -680,6 +789,7 @@ function fillForm(ev) {
   document.getElementById('fLink').value     = ev.link     || '';
   document.getElementById('fPhone').value    = ev.phone    || '';
   document.getElementById('fFormLink').value = ev.form_link || '';
+  document.getElementById('fEmail').value    = ev.email     || '';
   refreshWaHint();
   document.getElementById('fImage').value    = ev.image    || '';
   document.getElementById('fCaption').value  = ev.caption_full || '';
@@ -693,7 +803,7 @@ function fillForm(ev) {
 
 function clearForm() {
   ['fId','fSource','fTitle','fTime','fVenue','fPrice',
-   'fDuration','fLanguage','fLink','fPhone','fFormLink','fImage','fCaption'].forEach(id => {
+   'fDuration','fLanguage','fLink','fPhone','fFormLink','fEmail','fImage','fCaption'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('fCity').value = '';
@@ -742,6 +852,7 @@ async function saveEvent() {
     link:         waLink || document.getElementById('fLink').value.trim(),
     phone:        phone,
     form_link:    document.getElementById('fFormLink').value.trim(),
+    email:        document.getElementById('fEmail').value.trim(),
     image:        document.getElementById('fImage').value.trim(),
     caption_full: document.getElementById('fCaption').value.trim(),
   };

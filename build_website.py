@@ -313,6 +313,7 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .card-hover-scrim a.whatsapp{{background:rgba(37,211,102,.92)}}
 .card-hover-scrim a.instagram-btn{{background:linear-gradient(135deg,rgba(131,58,180,.9),rgba(253,29,29,.9))}}
 .card-hover-scrim a.register{{background:rgba(232,76,61,.92)}}
+.card-hover-scrim a.email-btn{{background:rgba(26,115,232,.92)}}
 .card-hover-scrim a:hover{{transform:scale(1.06);border-color:rgba(255,255,255,.9)}}
 
 /* text info strip */
@@ -362,6 +363,8 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .action-btn.secondary{{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}}
 .action-btn.secondary:hover{{border-color:var(--text);background:#f0f0f0}}
 .action-btn.instagram-btn{{background:linear-gradient(135deg,#833AB4,#FD1D1D);color:#fff}}
+.action-btn.email-btn{{background:#1A73E8;color:#fff}}
+.action-btn.email-btn:hover{{background:#1558B0}}
 
 /* ── Footer ── */
 footer{{background:#1A1A2E;color:rgba(255,255,255,.6);text-align:center;padding:32px 20px;margin-top:60px}}
@@ -671,10 +674,12 @@ function render() {{
     let scrimBtns = '';
     if (ev.form_link) {{
       scrimBtns += `<a href="${{ev.form_link}}" target="_blank" class="register" onclick="event.stopPropagation()">📝 Register Now</a>`;
-      if (ev.link && !ev.link.includes('wa.me')) {{
-        const igLabel = ev.link.includes('instagram') ? '📸 View on Instagram' : '🔗 View Post';
-        scrimBtns += `<a href="${{ev.link}}" target="_blank" class="instagram-btn" onclick="event.stopPropagation()">${{igLabel}}</a>`;
+      if (ev.email) {{
+        scrimBtns += `<a href="mailto:${{ev.email}}" class="email-btn" onclick="event.stopPropagation()">✉️ Email Us</a>`;
       }}
+    }} else if (ev.email) {{
+      scrimBtns += `<a href="mailto:${{ev.email}}" class="email-btn" onclick="event.stopPropagation()">✉️ Email Us</a>`;
+      if (action) scrimBtns += `<a href="${{action.url}}" target="_blank" class="${{action.type}}" onclick="event.stopPropagation()">${{action.icon}} ${{action.label}}</a>`;
     }} else if (action) {{
       scrimBtns = `<a href="${{action.url}}" target="_blank" class="${{action.type}}" onclick="event.stopPropagation()">${{action.icon}} ${{action.label}}</a>`;
     }}
@@ -780,11 +785,17 @@ function openModal(filtI, globalI) {{
   const actions = [];
   if (ev.form_link) {{
     actions.push(`<a href="${{ev.form_link}}" target="_blank" class="action-btn primary">📝 Register Now</a>`);
+    if (ev.email) {{
+      actions.push(`<a href="mailto:${{ev.email}}" class="action-btn email-btn">✉️ Email Us</a>`);
+    }}
     if (ev.link && !ev.link.includes('wa.me')) {{
       const igLabel = ev.link.includes('instagram') ? '📸 View on Instagram' : '🔗 View Post';
       actions.push(`<a href="${{ev.link}}" target="_blank" class="action-btn secondary">${{igLabel}}</a>`);
     }}
   }} else {{
+    if (ev.email) {{
+      actions.push(`<a href="mailto:${{ev.email}}" class="action-btn email-btn">✉️ Email Us</a>`);
+    }}
     if (action) actions.push(`<a href="${{action.url}}" target="_blank" class="action-btn ${{action.type}}">${{action.icon}} ${{action.label}}</a>`);
     if (ev.link && action && action.url !== ev.link) {{
       const linkLabel = src === 'bms' ? '🔗 View on BMS' : '📸 View Post';
