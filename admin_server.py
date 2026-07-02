@@ -110,35 +110,33 @@ IG_JS = r"""
     let imgUrl = '';
     let bestW  = 0;
 
-    // 1. Highest-res image from srcset inside article / dialog
-    for (const img of document.querySelectorAll('article img, div[role="dialog"] img')) {
+    function bestFromImg(img) {
         const entries = parseSrcset(img.srcset || img.getAttribute('srcset'));
-        if (entries.length && entries[0].w > bestW) {
-            bestW  = entries[0].w;
-            imgUrl = entries[0].src;
-        }
-        // Also consider the src itself
-        const w = img.naturalWidth || 0;
-        if (!entries.length && isCDN(img.src) && w > bestW && w > 200) {
-            bestW  = w;
-            imgUrl = img.src;
-        }
+        if (entries.length) return entries[0].src;
+        if (isCDN(img.src) && (img.naturalWidth || 0) > 200) return img.src;
+        return '';
     }
 
-    // 2. Fallback: og:image
-    if (!imgUrl) imgUrl = og('og:image');
+    // 1. Carousel: first <li> inside article holds the first slide
+    const firstSlide = document.querySelector('article ul li:first-child img, article ul li:first-child picture img');
+    if (firstSlide) imgUrl = bestFromImg(firstSlide);
 
-    // 3. Last resort: any large CDN image anywhere on the page
+    // 2. Single-image post or dialog: first non-avatar article img
     if (!imgUrl) {
-        let best = { src: '', w: 0 };
-        for (const img of document.querySelectorAll('img[src]')) {
-            const entries = parseSrcset(img.srcset || img.getAttribute('srcset'));
-            if (entries.length && entries[0].w > best.w) best = entries[0];
-            const w = img.naturalWidth || 0;
-            if (!entries.length && isCDN(img.src) && w > best.w) best = { src: img.src, w };
+        for (const img of document.querySelectorAll('article img, div[role="dialog"] img')) {
+            const s = window.getComputedStyle(img);
+            const p = img.parentElement;
+            const isAvatar = (img.naturalWidth > 0 && img.naturalWidth < 150)
+                || s.borderRadius === '50%' || s.clipPath.includes('circle')
+                || (p && window.getComputedStyle(p).borderRadius === '50%');
+            if (isAvatar) continue;
+            const src = bestFromImg(img);
+            if (src) { imgUrl = src; break; }
         }
-        if (best.src) imgUrl = best.src;
     }
+
+    // 3. og:image fallback
+    if (!imgUrl) imgUrl = og('og:image');
 
     return {
         imgUrl:  imgUrl,
@@ -175,10 +173,13 @@ async def _bms_fetch(url):
 
 async def _ig_fetch(url):
     from playwright.async_api import async_playwright
+    import base64 as _b64
     subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
     time.sleep(2)
 
     img_local = ''
+    captured  = []   # (size_bytes, raw_bytes) — filled by network interception
+
     async with async_playwright() as pw:
         ctx = await pw.chromium.launch_persistent_context(
             user_data_dir=str(EDGE_PROFILE), executable_path=EDGE_EXE,
@@ -187,6 +188,23 @@ async def _ig_fetch(url):
             viewport={"width": 1280, "height": 900},
         )
         page = await ctx.new_page()
+
+        # Capture CDN image bytes as the browser loads them — no re-fetch needed
+        async def _on_response(response):
+            u = response.url
+            if ('cdninstagram' in u or 'fbcdn' in u) and '/v/' in u:
+                ct = response.headers.get('content-type', '')
+                if 'image' in ct:
+                    try:
+                        body = await response.body()
+                        if len(body) > 30_000:   # skip tiny avatars / icons
+                            captured.append((u, body))
+                            print(f"  Intercepted CDN image: {len(body):,} bytes  {u.split('?')[0][-50:]}"  )
+                    except Exception:
+                        pass
+
+        page.on('response', _on_response)
+
         await page.goto(url, wait_until='domcontentloaded', timeout=30000)
         await page.wait_for_timeout(9000)
         for sel in ['button:has-text("Not Now")', 'button:has-text("Not now")', '[aria-label="Close"]']:
@@ -200,42 +218,47 @@ async def _ig_fetch(url):
         await page.wait_for_timeout(2000)
         raw = await page.evaluate(IG_JS)
 
-        if raw.get('imgUrl'):
+        h  = hashlib.md5(url.encode()).hexdigest()[:8]
+        fn = f"custom_{h}.jpg"
+
+        if captured:
+            # Prefer the image whose URL matches what IG_JS identified (first carousel slide)
+            raw_url = raw.get('imgUrl', '')
+            matched = next((body for (u, body) in captured if u == raw_url), None)
+            if matched:
+                best_body = matched
+                print(f"  Using URL-matched intercepted image: {len(best_body):,} bytes")
+            else:
+                # Fall back to first intercepted (load order = display order on page)
+                best_body = captured[0][1]
+                print(f"  Using first intercepted image: {len(best_body):,} bytes")
+            (IMG_DIR / fn).write_bytes(best_body)
+            img_local = f"images/{fn}"
+        elif raw.get('imgUrl'):
+            # Fallback: re-fetch using FileReader (handles binary correctly)
             try:
-                import base64 as _b64
-                h  = hashlib.md5(url.encode()).hexdigest()[:8]
-                fn = f"custom_{h}.jpg"
-                # Download via fetch() in the same page so Instagram session cookies are sent
                 img_b64 = await page.evaluate("""async (imgUrl) => {
                     try {
                         const r = await fetch(imgUrl, {credentials: 'include'});
                         if (!r.ok) return null;
-                        const buf = await r.arrayBuffer();
-                        const bytes = new Uint8Array(buf);
-                        let bin = '';
-                        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-                        return btoa(bin);
+                        const blob = await r.blob();
+                        return await new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                            reader.readAsDataURL(blob);
+                        });
                     } catch(e) { return null; }
                 }""", raw['imgUrl'])
                 if img_b64:
                     (IMG_DIR / fn).write_bytes(_b64.b64decode(img_b64))
                     img_local = f"images/{fn}"
-                    print(f"  Image saved via fetch(): {len(_b64.b64decode(img_b64))} bytes")
+                    print(f"  Image saved via fetch() fallback: {len(_b64.b64decode(img_b64)):,} bytes")
                 else:
-                    # Fallback: open a new page with the original URL
-                    print("  fetch() returned null — falling back to new page")
-                    p2   = await ctx.new_page()
-                    resp = await p2.goto(raw['imgUrl'], timeout=20000)
-                    if resp and resp.status == 200:
-                        body = await resp.body()
-                        (IMG_DIR / fn).write_bytes(body)
-                        img_local = f"images/{fn}"
-                        print(f"  Image saved via new page: {len(body)} bytes")
-                    else:
-                        print(f"  New page also failed: status {resp.status if resp else 'no response'}")
-                    await p2.close()
+                    print("  fetch() fallback returned null — no image saved")
             except Exception as e:
-                print(f"Image download warning: {e}")
+                print(f"  Image download warning: {e}")
+        else:
+            print("  No image URL found on page")
 
         await ctx.close()
 
@@ -260,7 +283,7 @@ async def _ig_fetch(url):
             break
 
     # ── Time ─────────────────────────────────────────────────────────
-    time = ''
+    event_time = ''
     for pat in [
         r'(?:time|timing|timings|starts?|begins?|from|🕐)[:\s–-]+(\d{1,2}(?::\d{2})?\s*(?:AM|PM))',
         r'\b(\d{1,2}:\d{2}\s*(?:AM|PM))',
@@ -279,7 +302,7 @@ async def _ig_fetch(url):
             tl = re.match(r'^(\d{1,2})\s*(AM|PM)$', t, re.I)
             if tl:
                 t = f"{tl.group(1)}:00 {tl.group(2).upper()}"
-            time = t
+            event_time = t
             break
 
     # ── Venue ────────────────────────────────────────────────────────
@@ -322,7 +345,7 @@ async def _ig_fetch(url):
     return {
         'title':        raw.get('title', ''),
         'date':         date,
-        'time':         time,
+        'time':         event_time,
         'venue':        venue,
         'price':        price,
         'email':        email,

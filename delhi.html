@@ -581,23 +581,24 @@ function openModal(filtI, globalI) {
   // Actions
   const action  = getBookingAction(ev);
   const actions = [];
+  const stopProp = `onclick="event.stopPropagation()"`;
   if (ev.form_link) {
-    actions.push(`<a href="${ev.form_link}" target="_blank" class="action-btn primary">📝 Register Now</a>`);
+    actions.push(`<a href="${ev.form_link}" target="_blank" ${stopProp} class="action-btn primary">📝 Register Now</a>`);
     if (ev.email) {
-      actions.push(`<a href="mailto:${ev.email}" class="action-btn email-btn">✉️ Email Us</a>`);
+      actions.push(`<a href="mailto:${ev.email}" ${stopProp} class="action-btn email-btn">✉️ Email Us</a>`);
     }
     if (ev.link && !ev.link.includes('wa.me')) {
       const igLabel = ev.link.includes('instagram') ? '📸 View on Instagram' : '🔗 View Post';
-      actions.push(`<a href="${ev.link}" target="_blank" class="action-btn secondary">${igLabel}</a>`);
+      actions.push(`<a href="${ev.link}" target="_blank" ${stopProp} class="action-btn secondary">${igLabel}</a>`);
     }
   } else {
     if (ev.email) {
-      actions.push(`<a href="mailto:${ev.email}" class="action-btn email-btn">✉️ Email Us</a>`);
+      actions.push(`<a href="mailto:${ev.email}" ${stopProp} class="action-btn email-btn">✉️ Email Us</a>`);
     }
-    if (action) actions.push(`<a href="${action.url}" target="_blank" class="action-btn ${action.type}">${action.icon} ${action.label}</a>`);
+    if (action) actions.push(`<a href="${action.url}" target="_blank" ${stopProp} class="action-btn ${action.type}">${action.icon} ${action.label}</a>`);
     if (ev.link && action && action.url !== ev.link) {
       const linkLabel = src === 'bms' ? '🔗 View on BMS' : '📸 View Post';
-      actions.push(`<a href="${ev.link}" target="_blank" class="action-btn secondary">${linkLabel}</a>`);
+      actions.push(`<a href="${ev.link}" target="_blank" ${stopProp} class="action-btn secondary">${linkLabel}</a>`);
     }
   }
   document.getElementById('modalActions').innerHTML = actions.join('');
