@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Auto-generated cache (rebuilt on every run)
+sold_out_cache.json
+
+# Playwright browser binaries (installed separately)
+.playwright/

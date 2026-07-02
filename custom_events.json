@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "38efd9b6",
+    "_source": "instagram",
+    "title": "\"What’s That Bird? — A 2-day birdwatching workshop for beginners & curious minds!",
+    "city": "Jaipur",
+    "date": "Sat, 4 Jul 2026",
+    "time": "8:30 AM",
+    "venue": "Kishanbagh Sandunes Park",
+    "price": "",
+    "duration": "2 Hours",
+    "language": "Hindi, English",
+    "link": "https://wa.me/917014563426",
+    "phone": "7014563426",
+    "image": "images/custom_f4dffe35.jpg",
+    "caption_full": "108 likes, 4 comments - dinkarsamore on June 30, 2026: \"What’s That Bird? — \nA 2-day birdwatching workshop for beginners & curious minds! \n\nThis 2-day workshop is designed to introduce you to the wonderful world of birds, birdwatching as a hobby, and help you identify species commonly seen around Jaipur city.\n\nAt Kishan Bagh Sand Dunes Park, Jaipur | On 4th & 5th July | Between 6:30–8:30 AM | Walks, ID tips, & more\n\nLimited seats available! To register & know more, Dm or WhatsApp me: 7014563426\".",
+    "_city": "Jaipur"
+  },
+  {
+    "_source": "bms",
+    "title": "Kathak Recital by Manisha Gulyani",
+    "city": "Jaipur",
+    "date": "Sat, 4 Jul 2026",
+    "time": "6:30 PM",
+    "venue": "Mini Audi 1-Rajasthan International Centre: Jaipur",
+    "price": "100",
+    "duration": "1 hour 15 minutes",
+    "language": "",
+    "link": "https://in.bookmyshow.com/events/kathak-recital-by-manisha-gulyani/ET00504774",
+    "image": "https://in.bmscdn.com/events/moviecard/ET00504774.jpg",
+    "caption_full": "",
+    "_id": "db7c49db",
+    "_city": "Jaipur"
+  }
+]
