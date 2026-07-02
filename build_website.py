@@ -187,9 +187,9 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
         )
     else:
         city_tabs = (
-            '<button class="city-tab active" data-city="all" onclick="setCity(\'all\')">All Cities</button>'
+            '<a class="city-tab active" href="index.html" data-city="all">All Cities</a>'
             + "".join(
-                f'<button class="city-tab" data-city="{c}" onclick="setCity(\'{c}\')">{c}</button>'
+                f'<a class="city-tab" href="{city_filename(c)}" data-city="{c}">{c}</a>'
                 for c in all_c
             )
         )
