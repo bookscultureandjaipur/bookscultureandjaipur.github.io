@@ -98,16 +98,24 @@ IG_JS = r"""
 () => {
     const og = s => { const el = document.querySelector(`meta[property="${s}"]`); return el ? el.getAttribute('content') || '' : ''; };
 
-    // og:image is the canonical post image — most reliable
-    let imgUrl = og('og:image');
+    // 1. Best: largest image inside the post article element
+    let imgUrl = '';
+    const articleImgs = Array.from(document.querySelectorAll('article img[src], div[role="dialog"] img[src]'))
+        .map(i => ({ src: i.src, w: i.naturalWidth || 0, h: i.naturalHeight || 0 }))
+        .filter(i => (i.src.includes('cdninstagram') || i.src.includes('fbcdn')) && i.w > 200 && i.h > 200);
+    articleImgs.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+    if (articleImgs.length) imgUrl = articleImgs[0].src;
 
-    // Fallback: largest cdninstagram/fbcdn image on the page
+    // 2. Fallback: og:image meta tag
+    if (!imgUrl) imgUrl = og('og:image');
+
+    // 3. Last resort: any large cdninstagram image on the page
     if (!imgUrl) {
-        const imgs = Array.from(document.querySelectorAll('img[src]'))
+        const allImgs = Array.from(document.querySelectorAll('img[src]'))
             .map(i => ({ src: i.src, w: i.naturalWidth || 0, h: i.naturalHeight || 0 }))
-            .filter(i => (i.src.includes('cdninstagram') || i.src.includes('fbcdn')) && i.w > 200);
-        imgs.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-        if (imgs.length) imgUrl = imgs[0].src;
+            .filter(i => (i.src.includes('cdninstagram') || i.src.includes('fbcdn')) && i.w > 300);
+        allImgs.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+        if (allImgs.length) imgUrl = allImgs[0].src;
     }
 
     return {
@@ -172,14 +180,32 @@ async def _ig_fetch(url):
 
         if raw.get('imgUrl'):
             try:
-                h   = hashlib.md5(url.encode()).hexdigest()[:8]
-                fn  = f"custom_{h}.jpg"
-                p2  = await ctx.new_page()
-                resp = await p2.goto(raw['imgUrl'], timeout=20000)
-                if resp and resp.status == 200:
-                    (IMG_DIR / fn).write_bytes(await resp.body())
+                import base64 as _b64
+                h  = hashlib.md5(url.encode()).hexdigest()[:8]
+                fn = f"custom_{h}.jpg"
+                # Download via fetch() in the same page so Instagram session cookies are sent
+                img_b64 = await page.evaluate("""async (imgUrl) => {
+                    try {
+                        const r = await fetch(imgUrl, {credentials: 'include'});
+                        if (!r.ok) return null;
+                        const buf = await r.arrayBuffer();
+                        const bytes = new Uint8Array(buf);
+                        let bin = '';
+                        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                        return btoa(bin);
+                    } catch(e) { return null; }
+                }""", raw['imgUrl'])
+                if img_b64:
+                    (IMG_DIR / fn).write_bytes(_b64.b64decode(img_b64))
                     img_local = f"images/{fn}"
-                await p2.close()
+                else:
+                    # Fallback: open a new page (old behaviour)
+                    p2   = await ctx.new_page()
+                    resp = await p2.goto(raw['imgUrl'], timeout=20000)
+                    if resp and resp.status == 200:
+                        (IMG_DIR / fn).write_bytes(await resp.body())
+                        img_local = f"images/{fn}"
+                    await p2.close()
             except Exception as e:
                 print(f"Image download warning: {e}")
 

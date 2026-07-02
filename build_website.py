@@ -306,12 +306,13 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .badge-city{{background:rgba(0,0,0,.5);color:rgba(255,255,255,.9);backdrop-filter:blur(4px)}}
 
 /* hover scrim + book button */
-.card-hover-scrim{{position:absolute;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .22s;z-index:2}}
+.card-hover-scrim{{position:absolute;inset:0;background:rgba(0,0,0,.42);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .22s;z-index:2}}
 .event-card:hover .card-hover-scrim{{opacity:1}}
-.card-hover-scrim a{{padding:11px 26px;border-radius:24px;font-size:.88rem;font-weight:700;color:#fff;text-decoration:none;border:2px solid rgba(255,255,255,.5);backdrop-filter:blur(6px);transition:transform .15s,border-color .15s}}
+.card-hover-scrim a{{padding:10px 22px;border-radius:24px;font-size:.84rem;font-weight:700;color:#fff;text-decoration:none;border:2px solid rgba(255,255,255,.5);backdrop-filter:blur(6px);transition:transform .15s,border-color .15s;white-space:nowrap;width:72%;text-align:center}}
 .card-hover-scrim a.primary{{background:rgba(232,76,61,.92)}}
 .card-hover-scrim a.whatsapp{{background:rgba(37,211,102,.92)}}
 .card-hover-scrim a.instagram-btn{{background:linear-gradient(135deg,rgba(131,58,180,.9),rgba(253,29,29,.9))}}
+.card-hover-scrim a.register{{background:rgba(232,76,61,.92)}}
 .card-hover-scrim a:hover{{transform:scale(1.06);border-color:rgba(255,255,255,.9)}}
 
 /* text info strip */
@@ -667,10 +668,17 @@ function render() {{
         + `<div class="card-poster-placeholder ${{src}}" style="display:none">${{src==='bms'?'🎭':'📸'}}</div>`
       : `<div class="card-poster-placeholder ${{src}}">${{src==='bms'?'🎭':'📸'}}</div>`;
 
-    const scrim = action
-      ? `<div class="card-hover-scrim"><a href="${{action.url}}" target="_blank" class="${{action.type}}"
-             onclick="event.stopPropagation()">${{action.icon}} ${{action.label}}</a></div>`
-      : '';
+    let scrimBtns = '';
+    if (ev.form_link) {{
+      scrimBtns += `<a href="${{ev.form_link}}" target="_blank" class="register" onclick="event.stopPropagation()">📝 Register Now</a>`;
+      if (ev.link && !ev.link.includes('wa.me')) {{
+        const igLabel = ev.link.includes('instagram') ? '📸 View on Instagram' : '🔗 View Post';
+        scrimBtns += `<a href="${{ev.link}}" target="_blank" class="instagram-btn" onclick="event.stopPropagation()">${{igLabel}}</a>`;
+      }}
+    }} else if (action) {{
+      scrimBtns = `<a href="${{action.url}}" target="_blank" class="${{action.type}}" onclick="event.stopPropagation()">${{action.icon}} ${{action.label}}</a>`;
+    }}
+    const scrim = scrimBtns ? `<div class="card-hover-scrim">${{scrimBtns}}</div>` : '';
 
     return `<div class="event-card" onclick="openModal(${{i}},${{gi}})">
       <div class="card-img-wrap">
