@@ -89,8 +89,12 @@ def normalize(ev, source, city):
         ev["_price_num"]     = 0
     elif re.search(r'[\d,]+', price_raw):
         digits = re.sub(r'[^\d]', '', price_raw)
-        ev["_price_display"] = f"₹{int(digits):,}" if digits else price_raw
-        ev["_price_num"]     = int(digits) if digits else None
+        if digits:
+            suffix = '+' if ev.get('_source') == 'bms' else ''
+            ev["_price_display"] = f"₹{int(digits):,}{suffix}"
+        else:
+            ev["_price_display"] = price_raw
+        ev["_price_num"] = int(digits) if digits else None
     elif price_raw:
         ev["_price_display"] = price_raw
         ev["_price_num"]     = None
