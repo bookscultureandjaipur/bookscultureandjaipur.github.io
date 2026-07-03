@@ -237,66 +237,68 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{SITE_URL}/images/logo.jpg">
 <meta name="google-site-verification" content="eCR9lUR6rnhGIpUEE4KPyNc0ENVJga41rt24Fcc3koc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
 :root{{
-  --red:#E84C3D;--purple:#9B59B6;--green:#27AE60;--orange:#E67E22;
-  --bg:#F4F6F8;--surface:#fff;--border:#E8ECF0;--text:#1A1A2E;
-  --text2:#5A6A7A;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);
+  --brand:#C97B63;--brand-dark:#A65A44;--brand-light:#F0D5CB;
+  --green:#27AE60;--purple:#9B59B6;
+  --bg:#FDF6F2;--surface:#fff;--border:#EDD5C8;
+  --text:#2C1810;--text2:#8A6255;--radius:12px;
+  --shadow:0 2px 12px rgba(44,24,16,.09);
 }}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}}
 a{{text-decoration:none;color:inherit}}
 button{{cursor:pointer;border:none;background:none;font-family:inherit}}
 
 /* ── Header ── */
-header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}}
-.header-inner{{max-width:1200px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}}
-.logo{{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;color:var(--red)}}
-.logo-dot{{width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block}}
+header{{background:#fff;border-bottom:2px solid var(--brand-light);position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(44,24,16,.07)}}
+.header-inner{{max-width:1200px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}}
+.logo{{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',Georgia,serif;font-size:1.15rem;font-weight:700;color:var(--brand);letter-spacing:.01em}}
+.logo img{{height:46px;width:46px;object-fit:cover;border-radius:8px;flex-shrink:0}}
 .header-search{{flex:1;max-width:420px;position:relative}}
-.header-search input{{width:100%;padding:10px 16px 10px 40px;border:1.5px solid var(--border);border-radius:24px;font-size:.9rem;outline:none;transition:border .2s}}
-.header-search input:focus{{border-color:var(--red)}}
+.header-search input{{width:100%;padding:10px 16px 10px 40px;border:1.5px solid var(--border);border-radius:24px;font-size:.9rem;outline:none;transition:border .2s;background:#fff}}
+.header-search input:focus{{border-color:var(--brand)}}
 .header-search .search-icon{{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text2);font-size:1rem}}
-.header-actions{{display:flex;gap:10px;align-items:center}}
-.btn-outline{{padding:8px 18px;border:1.5px solid var(--red);color:var(--red);border-radius:24px;font-weight:600;font-size:.85rem;transition:all .2s}}
-.btn-outline:hover{{background:var(--red);color:#fff}}
 
 /* ── Hero ── */
-.hero{{background:linear-gradient(135deg,#1A1A2E 0%,#16213E 50%,#0F3460 100%);color:#fff;padding:60px 20px 50px;text-align:center}}
-.hero h1{{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:12px;line-height:1.2}}
-.hero h1 span{{color:#E84C3D}}
-.hero p{{color:rgba(255,255,255,.7);font-size:1.05rem;margin-bottom:30px}}
-.hero-search{{max-width:560px;margin:0 auto;display:flex;background:#fff;border-radius:32px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.25)}}
+.hero{{background:linear-gradient(135deg,#C97B63 0%,#A65A44 55%,#8B3A26 100%);color:#fff;padding:64px 20px 52px;text-align:center;position:relative;overflow:hidden}}
+.hero::before{{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M30 0 C20 0 12 8 12 18 L12 22 C12 26 15 28 15 28 L12 28 L12 42 L48 42 L48 28 L45 28 C45 28 48 26 48 22 L48 18 C48 8 40 0 30 0 Z M30 4 C38 4 44 10 44 18 L44 22 C44 25 42 27 42 27 L18 27 C18 27 16 25 16 22 L16 18 C16 10 22 4 30 4 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:.5}}
+.hero h1{{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;margin-bottom:14px;line-height:1.2;position:relative}}
+.hero h1 span{{color:#FFE0D4}}
+.hero p{{color:rgba(255,255,255,.82);font-size:1.05rem;margin-bottom:32px;position:relative}}
+.hero-search{{max-width:560px;margin:0 auto;display:flex;background:#fff;border-radius:32px;overflow:hidden;box-shadow:0 8px 32px rgba(44,24,16,.3);position:relative}}
 .hero-search input{{flex:1;padding:16px 20px;border:none;outline:none;font-size:1rem;color:var(--text)}}
-.hero-search button{{padding:12px 28px;background:var(--red);color:#fff;font-weight:700;font-size:.95rem;border-radius:0 32px 32px 0;transition:background .2s}}
-.hero-search button:hover{{background:#c0392b}}
-.hero-stats{{display:flex;justify-content:center;gap:40px;margin-top:36px}}
+.hero-search button{{padding:12px 28px;background:var(--brand-dark);color:#fff;font-weight:700;font-size:.95rem;border-radius:0 32px 32px 0;transition:background .2s}}
+.hero-search button:hover{{background:#7A3020}}
+.hero-stats{{display:flex;justify-content:center;gap:40px;margin-top:36px;position:relative}}
 .hero-stat{{text-align:center}}
-.hero-stat .num{{font-size:1.8rem;font-weight:800;color:#fff}}
-.hero-stat .lbl{{font-size:.8rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px}}
+.hero-stat .num{{font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:800;color:#fff}}
+.hero-stat .lbl{{font-size:.78rem;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}}
 
 /* ── Filter Bar ── */
-.filter-bar{{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:90}}
+.filter-bar{{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:68px;z-index:90}}
 .filter-inner{{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;flex-direction:column;gap:10px}}
 .city-tabs{{display:flex;gap:8px;flex-wrap:wrap;align-items:center}}
-.city-tabs span{{font-size:.8rem;font-weight:600;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.5px}}
+.city-tabs span{{font-size:.75rem;font-weight:700;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.6px}}
 .city-tab{{padding:7px 18px;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--text2);border:1.5px solid var(--border);transition:all .2s}}
-.city-tab:hover,.city-tab.active{{background:var(--red);color:#fff;border-color:var(--red)}}
+.city-tab:hover,.city-tab.active{{background:var(--brand);color:#fff;border-color:var(--brand)}}
 .genre-row{{display:flex;gap:8px;flex-wrap:wrap;align-items:center}}
-.genre-row span{{font-size:.8rem;font-weight:600;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.5px}}
+.genre-row span{{font-size:.75rem;font-weight:700;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.6px}}
 .genre-chip{{padding:5px 14px;border-radius:16px;font-size:.82rem;font-weight:500;color:var(--text2);border:1.5px solid var(--border);transition:all .2s}}
-.genre-chip:hover,.genre-chip.active{{background:#1A1A2E;color:#fff;border-color:#1A1A2E}}
+.genre-chip:hover,.genre-chip.active{{background:var(--text);color:#fff;border-color:var(--text)}}
 .date-row{{display:flex;gap:8px;flex-wrap:wrap;align-items:center}}
-.date-row span{{font-size:.8rem;font-weight:600;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.5px}}
+.date-row span{{font-size:.75rem;font-weight:700;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.6px}}
 .date-pill{{padding:5px 14px;border-radius:16px;font-size:.82rem;font-weight:500;color:var(--text2);border:1.5px solid var(--border);transition:all .2s}}
-.date-pill:hover,.date-pill.active{{background:var(--orange);color:#fff;border-color:var(--orange)}}
+.date-pill:hover,.date-pill.active{{background:var(--brand);color:#fff;border-color:var(--brand)}}
 .custom-date-row{{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:4px}}
 .custom-date-row label{{font-size:.8rem;color:var(--text2);font-weight:600}}
 .custom-date-row input[type="date"]{{padding:6px 11px;border:1.5px solid var(--border);border-radius:16px;font-size:.82rem;outline:none;color:var(--text);background:#fff;transition:border .18s;font-family:inherit}}
-.custom-date-row input[type="date"]:focus{{border-color:var(--orange)}}
+.custom-date-row input[type="date"]:focus{{border-color:var(--brand)}}
 .date-range-clear{{padding:5px 12px;border-radius:16px;font-size:.78rem;font-weight:600;color:var(--text2);border:1.5px solid var(--border);cursor:pointer;background:#fff;transition:all .2s}}
-.date-range-clear:hover{{background:#FFF0EE;color:var(--red);border-color:var(--red)}}
+.date-range-clear:hover{{background:var(--brand-light);color:var(--brand-dark);border-color:var(--brand)}}
 
 /* ── Main Content ── */
 .main{{max-width:1200px;margin:0 auto;padding:28px 20px}}
@@ -308,44 +310,42 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .event-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}}
 
 /* ── Event Card ── */
-.event-card{{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s}}
-.event-card:hover{{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.16)}}
+.event-card{{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s,border-color .22s}}
+.event-card:hover{{transform:translateY(-4px);box-shadow:0 14px 36px rgba(44,24,16,.15);border-color:var(--brand-light)}}
 
 /* square image zone */
-.card-img-wrap{{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#111;flex-shrink:0}}
-/* blurred background fills gaps for non-square images */
+.card-img-wrap{{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#2C1810;flex-shrink:0}}
 .card-img-bg{{position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);object-fit:cover;filter:blur(14px) brightness(.55) saturate(1.2);transform:scale(1.05);transition:transform .38s}}
-/* main image: contain so the full image is ALWAYS visible */
 .card-poster{{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;transition:transform .38s;z-index:1}}
 .event-card:hover .card-poster{{transform:scale(1.04)}}
 .event-card:hover .card-img-bg{{transform:scale(1.06)}}
 .card-poster-placeholder{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4rem;z-index:1}}
-.card-poster-placeholder.bms{{background:linear-gradient(160deg,#2a0808,#E84C3D44)}}
-.card-poster-placeholder.instagram{{background:linear-gradient(160deg,#1a0828,#833AB444,#FD1D1D22)}}
+.card-poster-placeholder.bms{{background:linear-gradient(160deg,#3a1008,#C97B6344)}}
+.card-poster-placeholder.instagram{{background:linear-gradient(160deg,#2a0818,#9B59B644,#C97B6322)}}
 .card-poster-placeholder.custom{{background:linear-gradient(160deg,#0a2a1a,#27AE6044)}}
-.badge-custom{{background:rgba(39,174,96,.9);color:#fff;backdrop-filter:blur(4px)}}
 
-/* floating badges on image */
+/* floating badges */
 .card-top{{position:absolute;top:9px;left:9px;right:9px;display:flex;justify-content:space-between;align-items:flex-start;gap:6px;z-index:1}}
 .badge{{padding:3px 9px;border-radius:10px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}}
-.badge-bms{{background:rgba(232,76,61,.9);color:#fff;backdrop-filter:blur(4px)}}
+.badge-bms{{background:rgba(201,123,99,.92);color:#fff;backdrop-filter:blur(4px)}}
 .badge-instagram{{background:rgba(131,58,180,.9);color:#fff;backdrop-filter:blur(4px)}}
+.badge-custom{{background:rgba(39,174,96,.9);color:#fff;backdrop-filter:blur(4px)}}
 .badge-free{{background:rgba(39,174,96,.92);color:#fff;backdrop-filter:blur(4px)}}
-.badge-price{{background:rgba(0,0,0,.62);color:#fff;backdrop-filter:blur(4px)}}
-.badge-city{{background:rgba(0,0,0,.5);color:rgba(255,255,255,.9);backdrop-filter:blur(4px)}}
+.badge-price{{background:rgba(44,24,16,.72);color:#fff;backdrop-filter:blur(4px)}}
+.badge-city{{background:rgba(44,24,16,.5);color:rgba(255,255,255,.9);backdrop-filter:blur(4px)}}
 
-/* hover scrim + book button */
-.card-hover-scrim{{position:absolute;inset:0;background:rgba(0,0,0,.42);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .22s;z-index:2}}
+/* hover scrim */
+.card-hover-scrim{{position:absolute;inset:0;background:rgba(44,24,16,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .22s;z-index:2}}
 .event-card:hover .card-hover-scrim{{opacity:1}}
 .card-hover-scrim a{{padding:10px 22px;border-radius:24px;font-size:.84rem;font-weight:700;color:#fff;text-decoration:none;border:2px solid rgba(255,255,255,.5);backdrop-filter:blur(6px);transition:transform .15s,border-color .15s;white-space:nowrap;width:72%;text-align:center}}
-.card-hover-scrim a.primary{{background:rgba(232,76,61,.92)}}
+.card-hover-scrim a.primary{{background:rgba(201,123,99,.92)}}
 .card-hover-scrim a.whatsapp{{background:rgba(37,211,102,.92)}}
 .card-hover-scrim a.instagram-btn{{background:linear-gradient(135deg,rgba(131,58,180,.9),rgba(253,29,29,.9))}}
-.card-hover-scrim a.register{{background:rgba(232,76,61,.92)}}
+.card-hover-scrim a.register{{background:rgba(201,123,99,.92)}}
 .card-hover-scrim a.email-btn{{background:rgba(26,115,232,.92)}}
 .card-hover-scrim a:hover{{transform:scale(1.06);border-color:rgba(255,255,255,.9)}}
 
-/* text info strip */
+/* card body */
 .card-body{{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}}
 .card-source-row{{display:flex;align-items:center;gap:6px}}
 .card-city-label{{font-size:.72rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}}
@@ -356,7 +356,7 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .price-tag{{font-size:.95rem;font-weight:700;color:var(--text)}}
 .price-tag.free{{color:var(--green)}}
 .genre-tags{{display:flex;gap:4px;flex-wrap:wrap}}
-.genre-tag{{background:#F0F4FF;color:#3A5FCD;padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:600}}
+.genre-tag{{background:#FDF0EB;color:var(--brand);padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:600}}
 
 /* ── Empty State ── */
 .empty-state{{text-align:center;padding:80px 20px;color:var(--text2)}}
@@ -364,48 +364,49 @@ header{{background:#fff;border-bottom:1px solid var(--border);position:sticky;to
 .empty-state h3{{font-size:1.2rem;margin-bottom:8px;color:var(--text)}}
 
 /* ── Modal ── */
-.modal-overlay{{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;padding:20px}}
+.modal-overlay{{display:none;position:fixed;inset:0;background:rgba(44,24,16,.7);z-index:200;align-items:center;justify-content:center;padding:20px}}
 .modal-overlay.open{{display:flex}}
 .modal{{background:#fff;border-radius:16px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;position:relative}}
-.modal-poster-wrap{{position:relative;width:100%;height:300px;overflow:hidden;border-radius:16px 16px 0 0;background:#1a1a2e;flex-shrink:0}}
+.modal-poster-wrap{{position:relative;width:100%;height:300px;overflow:hidden;border-radius:16px 16px 0 0;background:#2C1810;flex-shrink:0}}
 .modal-poster-wrap img{{width:100%;height:100%;object-fit:cover}}
-.modal-poster-gradient{{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}}
-.modal-poster-title{{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;color:#fff;font-size:1.2rem;font-weight:800;line-height:1.3}}
-.modal-close{{position:absolute;top:12px;right:12px;z-index:2;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#fff;font-size:1.1rem;flex-shrink:0;transition:background .2s;backdrop-filter:blur(4px)}}
-.modal-close:hover{{background:rgba(232,76,61,.85)}}
+.modal-poster-gradient{{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(44,24,16,.85),transparent)}}
+.modal-poster-title{{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;color:#fff;font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;line-height:1.3}}
+.modal-close{{position:absolute;top:12px;right:12px;z-index:2;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(44,24,16,.5);color:#fff;font-size:1.1rem;flex-shrink:0;transition:background .2s;backdrop-filter:blur(4px)}}
+.modal-close:hover{{background:rgba(201,123,99,.9)}}
 .modal-body{{padding:20px}}
 .modal-source-bar{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}}
 .detail-grid{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}}
-.detail-item{{background:var(--bg);border-radius:10px;padding:12px 14px}}
+.detail-item{{background:var(--bg);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}}
 .detail-label{{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:4px}}
 .detail-value{{font-size:.9rem;font-weight:600;color:var(--text)}}
 .detail-item.full{{grid-column:1/-1}}
-.caption-box{{background:#F8F9FA;border-radius:10px;padding:14px;margin-bottom:18px}}
+.caption-box{{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px}}
 .caption-label{{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:8px}}
 .caption-text{{font-size:.87rem;color:var(--text);line-height:1.6;white-space:pre-wrap;max-height:200px;overflow-y:auto}}
 .modal-actions{{display:flex;gap:10px;flex-wrap:wrap}}
 .action-btn{{flex:1;min-width:140px;padding:13px 20px;border-radius:24px;font-size:.9rem;font-weight:700;text-align:center;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}}
-.action-btn.primary{{background:var(--red);color:#fff}}
-.action-btn.primary:hover{{background:#c0392b}}
+.action-btn.primary{{background:var(--brand);color:#fff}}
+.action-btn.primary:hover{{background:var(--brand-dark)}}
 .action-btn.whatsapp{{background:#25D366;color:#fff}}
 .action-btn.whatsapp:hover{{background:#1da851}}
 .action-btn.secondary{{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}}
-.action-btn.secondary:hover{{border-color:var(--text);background:#f0f0f0}}
+.action-btn.secondary:hover{{border-color:var(--brand);background:var(--brand-light)}}
 .action-btn.instagram-btn{{background:linear-gradient(135deg,#833AB4,#FD1D1D);color:#fff}}
 .action-btn.email-btn{{background:#1A73E8;color:#fff}}
 .action-btn.email-btn:hover{{background:#1558B0}}
 
 /* ── Footer ── */
-footer{{background:#1A1A2E;color:rgba(255,255,255,.6);text-align:center;padding:32px 20px;margin-top:60px}}
-footer .footer-logo{{color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:8px}}
-footer p{{font-size:.85rem;line-height:1.6}}
+footer{{background:#2C1810;color:rgba(255,255,255,.55);text-align:center;padding:36px 20px;margin-top:60px}}
+footer .footer-logo{{font-family:'Playfair Display',Georgia,serif;color:#fff;font-size:1.4rem;font-weight:700;margin-bottom:10px;letter-spacing:.02em}}
+footer p{{font-size:.85rem;line-height:1.7}}
+footer a{{color:var(--brand-light);text-decoration:underline}}
 
 /* ── Responsive ── */
 @media(max-width:900px){{
   .event-grid{{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}}
 }}
 @media(max-width:600px){{
-  .hero{{padding:40px 16px 36px}}
+  .hero{{padding:44px 16px 38px}}
   .hero-stats{{gap:24px}}
   .header-search{{display:none}}
   .detail-grid{{grid-template-columns:1fr}}
@@ -421,9 +422,10 @@ footer p{{font-size:.85rem;line-height:1.6}}
 <!-- Header -->
 <header>
   <div class="header-inner">
-    <div class="logo">
+    <a href="{SITE_URL}/" class="logo">
+      <img src="{SITE_URL}/images/logo.jpg" alt="{site_name}">
       {site_name}
-    </div>
+    </a>
     <div class="header-search">
       <span class="search-icon">🔍</span>
       <input type="text" id="headerSearch" placeholder="Search events, venues..." oninput="onSearch(this.value)">
@@ -433,7 +435,7 @@ footer p{{font-size:.85rem;line-height:1.6}}
 
 <!-- Hero -->
 <section class="hero">
-  <h1>Find <span>Cultural Events</span><br>Near You</h1>
+  <h1>Discover <span>Cultural Events</span><br>Near You</h1>
   <p>{tagline}</p>
   <div class="hero-search">
     <input type="text" id="heroSearch" placeholder="Search plays, concerts, workshops..." oninput="onSearch(this.value)">
@@ -512,8 +514,8 @@ footer p{{font-size:.85rem;line-height:1.6}}
 <!-- Footer -->
 <footer>
   <div class="footer-logo">{site_name}</div>
-  <p>Aggregating cultural events from BookMyShow & Instagram.<br>
-  All event details belong to their respective organizers.</p>
+  <p>Curating plays, music &amp; cultural events across Indian cities.<br>
+  Event details belong to their respective organizers.</p>
 </footer>
 
 <script>
