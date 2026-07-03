@@ -172,18 +172,21 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
         page_title    = f"{genre_filter} Events in {city_filter} — {site_name}"
         page_desc     = (f"Discover {genre_filter.lower()} shows, concerts and performances "
                          f"in {city_filter}. Updated weekly from BookMyShow.")
-        fname         = output_filename or genre_filename(city_filter, genre_filter)
-        canonical_tag = f'<link rel="canonical" href="{SITE_URL}/{fname}">'
+        fname             = output_filename or genre_filename(city_filter, genre_filter)
+        canonical_tag_url = f"{SITE_URL}/{fname}"
+        canonical_tag     = f'<link rel="canonical" href="{canonical_tag_url}">'
     elif city_filter:
         page_title    = f"Events in {city_filter} | Plays, Music &amp; More — {site_name}"
         page_desc     = (f"Discover upcoming plays, music concerts, comedy shows and cultural events "
                          f"in {city_filter}. Updated weekly from BookMyShow.")
-        fname         = output_filename or city_filename(city_filter)
-        canonical_tag = f'<link rel="canonical" href="{SITE_URL}/{fname}">'
+        fname             = output_filename or city_filename(city_filter)
+        canonical_tag_url = f"{SITE_URL}/{fname}"
+        canonical_tag     = f'<link rel="canonical" href="{canonical_tag_url}">'
     else:
-        page_title    = f"{site_name} — {tagline}"
-        page_desc     = tagline
-        canonical_tag = f'<link rel="canonical" href="{SITE_URL}/">'
+        page_title        = f"{site_name} — {tagline}"
+        page_desc         = tagline
+        canonical_tag_url = f"{SITE_URL}/"
+        canonical_tag     = f'<link rel="canonical" href="{canonical_tag_url}">'
 
     # JS constants so client-side code knows which city/genre page this is
     city_page_js  = f"const CITY_PAGE  = '{city_filter}';"  if city_filter  else "const CITY_PAGE  = null;"
@@ -223,6 +226,16 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
 <title>{page_title}</title>
 <meta name="description" content="{page_desc}">
 {canonical_tag}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{SITE_NAME}">
+<meta property="og:title" content="{page_title}">
+<meta property="og:description" content="{page_desc}">
+<meta property="og:image" content="{SITE_URL}/images/logo.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="{canonical_tag_url}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE_URL}/images/logo.jpg">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
