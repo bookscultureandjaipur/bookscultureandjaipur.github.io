@@ -189,6 +189,10 @@ footer a{color:var(--brand-light);text-decoration:underline}
   .hero{padding:44px 16px 38px}
   .hero-stats{gap:24px}
   .header-search{display:none}
+  /* Hero search bar — removed from mobile for now, uncomment to restore */
+  .hero-search{display:none}
+  /* Cities count stat — removed from mobile for now, uncomment to restore */
+  .hero-stat-cities{display:none}
   .detail-grid{grid-template-columns:1fr}
   .filter-bar{position:static}
   .event-grid{grid-template-columns:1fr;gap:12px}
@@ -224,7 +228,7 @@ footer a{color:var(--brand-light);text-decoration:underline}
   <div class="hero-stats">
     <div class="hero-stat"><div class="num" id="statTotal">0</div><div class="lbl">Events</div></div>
     <div class="hero-stat"><div class="num" id="statFree">0</div><div class="lbl">Free</div></div>
-    <div class="hero-stat"><div class="num" id="statCities">0</div><div class="lbl">Cities</div></div>
+    <div class="hero-stat hero-stat-cities"><div class="num" id="statCities">0</div><div class="lbl">Cities</div></div>
     <div class="hero-stat"><div class="num" id="statWeekend">0</div><div class="lbl">This Weekend</div></div>
   </div>
 </section>
