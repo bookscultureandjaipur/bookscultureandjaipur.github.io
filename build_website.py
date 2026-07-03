@@ -42,6 +42,30 @@ def _parse_iso_datetime(date_str, time_str=''):
     return f'{year}-{month:02d}-{day:02d}{time_part}'
 
 
+def _event_end_date(date_str):
+    """Return the last date of the event as a date object, or None to never auto-remove."""
+    if not date_str:
+        return None
+    if re.search(r'onwards', date_str, re.I):
+        return None
+    matches = list(re.finditer(
+        r'(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s*(\d{4})?',
+        date_str, re.I,
+    ))
+    if not matches:
+        return None
+    year_m = re.search(r'\b(202\d)\b', date_str)
+    year = int(year_m.group(1)) if year_m else 2026
+    last = matches[-1]
+    day   = int(last.group(1))
+    month = _MONTHS_MAP[last.group(2).lower()[:3]]
+    ev_year = int(last.group(3)) if last.group(3) else year
+    try:
+        return date(ev_year, month, day)
+    except ValueError:
+        return None
+
+
 def generate_event_jsonld(events, site_url, max_events=40):
     """Return a <script type="application/ld+json"> tag with Event schema for the page."""
     items = []
@@ -225,6 +249,16 @@ def load_all_events():
         all_events.extend(events)
         skipped = f"  ({len(sold_out)} sold out skipped)" if sold_out else ""
         print(f"  Loaded {len(events):>3} events from {src['file']}{skipped}")
+    # Drop events whose last date has already passed
+    today = date.today()
+    before = len(all_events)
+    all_events = [
+        e for e in all_events
+        if (_event_end_date(e.get('date', '')) or date.max) >= today
+    ]
+    removed = before - len(all_events)
+    if removed:
+        print(f"  Removed {removed} past event(s)\n")
     print(f"  Total: {len(all_events)} events\n")
     return all_events
 
