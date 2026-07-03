@@ -368,6 +368,8 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
 <meta name="google-site-verification" content="eCR9lUR6rnhGIpUEE4KPyNc0ENVJga41rt24Fcc3koc">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DLJ79K6E6V"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','G-DLJ79K6E6V');</script>
+<link rel="icon" type="image/jpeg" href="{SITE_URL}/images/logo.jpg">
+<link rel="apple-touch-icon" href="{SITE_URL}/images/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
