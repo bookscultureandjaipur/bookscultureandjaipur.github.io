@@ -60,6 +60,8 @@ header{background:#fff;border-bottom:2px solid var(--brand-light);position:stick
 
 /* ── Filter Bar ── */
 .filter-bar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:68px;z-index:90}
+.filter-toggle-row{display:none}
+.filter-content{display:block}
 .filter-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;flex-direction:column;gap:10px}
 .city-tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .city-tabs span{font-size:.75rem;font-weight:700;color:var(--text2);margin-right:4px;text-transform:uppercase;letter-spacing:.6px}
@@ -193,6 +195,13 @@ footer a{color:var(--brand-light);text-decoration:underline}
   .hero-search{display:none}
   /* Cities count stat — removed from mobile for now, uncomment to restore */
   .hero-stat-cities{display:none}
+  .filter-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:10px}
+  .filter-toggle-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:20px;font-size:.88rem;font-weight:700;color:var(--text);transition:all .2s}
+  .filter-toggle-btn:hover,.filter-bar.open .filter-toggle-btn{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark)}
+  .filter-badge{background:var(--brand);color:#fff;border-radius:10px;padding:1px 7px;font-size:.72rem;font-weight:800}
+  .filter-summary{font-size:.78rem;color:var(--text2);font-weight:500;text-align:right;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .filter-content{display:none;border-top:1px solid var(--border)}
+  .filter-bar.open .filter-content{display:block}
   .detail-grid{grid-template-columns:1fr}
   .filter-bar{position:static}
   .event-grid{grid-template-columns:1fr;gap:12px}
@@ -234,30 +243,40 @@ footer a{color:var(--brand-light);text-decoration:underline}
 </section>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
-  <div class="filter-inner">
-    <div class="city-tabs">
-      <span>City</span>
-      <a class="city-tab" href="index.html" data-city="all">All Cities</a><a class="city-tab" href="bengaluru.html" data-city="Bengaluru">Bengaluru</a><a class="city-tab" href="delhi.html" data-city="Delhi">Delhi</a><a class="city-tab active" href="jaipur.html" data-city="Jaipur">Jaipur</a><a class="city-tab" href="mumbai.html" data-city="Mumbai">Mumbai</a>
-    </div>
-    <div class="date-row">
-      <span>Date</span>
-      <button class="date-pill active" data-date="all"       onclick="setDate('all')">All Dates</button>
-      <button class="date-pill"        data-date="weekend"   onclick="setDate('weekend')">This Weekend</button>
-      <button class="date-pill"        data-date="thisweek"  onclick="setDate('thisweek')">This Week</button>
-      <button class="date-pill"        data-date="nextweek"  onclick="setDate('nextweek')">Next Week</button>
-      <button class="date-pill"        data-date="custom"    onclick="setDate('custom')">📅 Pick Dates</button>
-    </div>
-    <div class="custom-date-row" id="customDateRow" style="display:none">
-      <label>From</label>
-      <input type="date" id="filterDateFrom" onchange="applyCustomRange()">
-      <label>to</label>
-      <input type="date" id="filterDateTo" onchange="applyCustomRange()">
-      <button class="date-range-clear" onclick="setDate('all')">✕ Clear</button>
-    </div>
-    <div class="genre-row">
-      <span>Category</span>
-      <button class="genre-chip" data-genre="Art" onclick="toggleGenre('Art')">🖼️ Art</button><button class="genre-chip" data-genre="Classical" onclick="toggleGenre('Classical')">🎼 Classical</button><button class="genre-chip" data-genre="Comedy" onclick="toggleGenre('Comedy')">😂 Comedy</button><button class="genre-chip" data-genre="Dance" onclick="toggleGenre('Dance')">💃 Dance</button><button class="genre-chip" data-genre="Drama" onclick="toggleGenre('Drama')">🎭 Drama</button><button class="genre-chip" data-genre="Event" onclick="toggleGenre('Event')">✨ Event</button><button class="genre-chip" data-genre="Film" onclick="toggleGenre('Film')">✨ Film</button><button class="genre-chip" data-genre="Heritage" onclick="toggleGenre('Heritage')">🏛️ Heritage</button><button class="genre-chip" data-genre="Musical" onclick="toggleGenre('Musical')">🎵 Musical</button><button class="genre-chip" data-genre="Poetry" onclick="toggleGenre('Poetry')">📜 Poetry</button><button class="genre-chip" data-genre="Workshop" onclick="toggleGenre('Workshop')">🎨 Workshop</button>
+<div class="filter-bar" id="filterBar">
+  <!-- Mobile-only toggle row -->
+  <div class="filter-toggle-row">
+    <button class="filter-toggle-btn" onclick="toggleFilters()">
+      🎛 Filters <span class="filter-badge" id="filterBadge" style="display:none">0</span>
+    </button>
+    <span class="filter-summary" id="filterSummary">All Cities · All Dates</span>
+  </div>
+  <!-- Filter content — collapsible on mobile -->
+  <div class="filter-content" id="filterContent">
+    <div class="filter-inner">
+      <div class="city-tabs">
+        <span>City</span>
+        <a class="city-tab" href="index.html" data-city="all">All Cities</a><a class="city-tab" href="bengaluru.html" data-city="Bengaluru">Bengaluru</a><a class="city-tab" href="delhi.html" data-city="Delhi">Delhi</a><a class="city-tab active" href="jaipur.html" data-city="Jaipur">Jaipur</a><a class="city-tab" href="mumbai.html" data-city="Mumbai">Mumbai</a>
+      </div>
+      <div class="date-row">
+        <span>Date</span>
+        <button class="date-pill active" data-date="all"       onclick="setDate('all')">All Dates</button>
+        <button class="date-pill"        data-date="weekend"   onclick="setDate('weekend')">This Weekend</button>
+        <button class="date-pill"        data-date="thisweek"  onclick="setDate('thisweek')">This Week</button>
+        <button class="date-pill"        data-date="nextweek"  onclick="setDate('nextweek')">Next Week</button>
+        <button class="date-pill"        data-date="custom"    onclick="setDate('custom')">📅 Pick Dates</button>
+      </div>
+      <div class="custom-date-row" id="customDateRow" style="display:none">
+        <label>From</label>
+        <input type="date" id="filterDateFrom" onchange="applyCustomRange()">
+        <label>to</label>
+        <input type="date" id="filterDateTo" onchange="applyCustomRange()">
+        <button class="date-range-clear" onclick="setDate('all')">✕ Clear</button>
+      </div>
+      <div class="genre-row">
+        <span>Category</span>
+        <button class="genre-chip" data-genre="Art" onclick="toggleGenre('Art')">🖼️ Art</button><button class="genre-chip" data-genre="Classical" onclick="toggleGenre('Classical')">🎼 Classical</button><button class="genre-chip" data-genre="Comedy" onclick="toggleGenre('Comedy')">😂 Comedy</button><button class="genre-chip" data-genre="Dance" onclick="toggleGenre('Dance')">💃 Dance</button><button class="genre-chip" data-genre="Drama" onclick="toggleGenre('Drama')">🎭 Drama</button><button class="genre-chip" data-genre="Event" onclick="toggleGenre('Event')">✨ Event</button><button class="genre-chip" data-genre="Film" onclick="toggleGenre('Film')">✨ Film</button><button class="genre-chip" data-genre="Heritage" onclick="toggleGenre('Heritage')">🏛️ Heritage</button><button class="genre-chip" data-genre="Musical" onclick="toggleGenre('Musical')">🎵 Musical</button><button class="genre-chip" data-genre="Poetry" onclick="toggleGenre('Poetry')">📜 Poetry</button><button class="genre-chip" data-genre="Workshop" onclick="toggleGenre('Workshop')">🎨 Workshop</button>
+      </div>
     </div>
   </div>
 </div>
@@ -695,7 +714,7 @@ function setCity(city) {
   }
   state.city = city;
   document.querySelectorAll('.city-tab').forEach(b => b.classList.toggle('active', b.dataset.city === city));
-  pushHash(); render();
+  pushHash(); render(); updateFilterBadge();
 }
 
 function setDate(d) {
@@ -710,23 +729,39 @@ function setDate(d) {
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value   = '';
   }
-  pushHash(); render();
+  pushHash(); render(); updateFilterBadge();
 }
 
 function applyCustomRange() {
   state.dateFrom = document.getElementById('filterDateFrom').value || null;
   state.dateTo   = document.getElementById('filterDateTo').value   || null;
-  pushHash(); render();
+  pushHash(); render(); updateFilterBadge();
 }
 
 function toggleGenre(g) {
   const btn = document.querySelector(`.genre-chip[data-genre="${g}"]`);
   if (state.genres.has(g)) { state.genres.delete(g); btn.classList.remove('active'); }
   else                      { state.genres.add(g);    btn.classList.add('active');    }
-  pushHash(); render();
+  pushHash(); render(); updateFilterBadge();
 }
 
 function setSort(v) { state.sort = v; render(); }
+
+function toggleFilters() {
+  document.getElementById('filterBar').classList.toggle('open');
+}
+
+function updateFilterBadge() {
+  let count = 0;
+  const parts = [];
+  if (state.city && state.city !== 'all') { count++; parts.push(state.city); } else { parts.push('All Cities'); }
+  if (state.date && state.date !== 'all') { count++; parts.push(state.date === 'weekend' ? 'Weekend' : state.date === 'thisweek' ? 'This Week' : state.date === 'nextweek' ? 'Next Week' : 'Custom Date'); } else { parts.push('All Dates'); }
+  if (state.genres.size) { count += state.genres.size; parts.push([...state.genres].join(', ')); }
+  const badge = document.getElementById('filterBadge');
+  const summary = document.getElementById('filterSummary');
+  if (badge) { badge.textContent = count; badge.style.display = count ? 'inline' : 'none'; }
+  if (summary) summary.textContent = parts.slice(0,2).join(' · ');
+}
 
 function onSearch(v) {
   state.search = v;
