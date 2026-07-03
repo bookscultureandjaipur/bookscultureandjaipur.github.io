@@ -236,6 +236,7 @@ def build_html(events, site_name, tagline, city_filter=None, genre_filter=None, 
 <meta property="og:url" content="{canonical_tag_url}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{SITE_URL}/images/logo.jpg">
+<meta name="google-site-verification" content="eCR9lUR6rnhGIpUEE4KPyNc0ENVJga41rt24Fcc3koc">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
