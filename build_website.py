@@ -12,7 +12,7 @@ Usage:
 import json
 import re
 import argparse
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 
@@ -42,8 +42,13 @@ def _parse_iso_datetime(date_str, time_str=''):
     return f'{year}-{month:02d}-{day:02d}{time_part}'
 
 
-def _event_end_date(date_str):
-    """Return the last date of the event as a date object, or None to never auto-remove."""
+def _event_end_datetime(date_str, time_str=''):
+    """Return when an event is considered done, or None to never auto-remove.
+
+    - 'onwards' or no date → None (keep forever)
+    - Has time → datetime at event start (removed 1 h after start by caller)
+    - No time → datetime at 23:59 on the last date (removed next day)
+    """
     if not date_str:
         return None
     if re.search(r'onwards', date_str, re.I):
@@ -57,11 +62,19 @@ def _event_end_date(date_str):
     year_m = re.search(r'\b(202\d)\b', date_str)
     year = int(year_m.group(1)) if year_m else 2026
     last = matches[-1]
-    day   = int(last.group(1))
-    month = _MONTHS_MAP[last.group(2).lower()[:3]]
+    day     = int(last.group(1))
+    month   = _MONTHS_MAP[last.group(2).lower()[:3]]
     ev_year = int(last.group(3)) if last.group(3) else year
     try:
-        return date(ev_year, month, day)
+        if time_str:
+            tm = re.match(r'(\d{1,2}):(\d{2})\s*(AM|PM)', time_str.strip(), re.I)
+            if tm:
+                h, mn, mer = int(tm.group(1)), int(tm.group(2)), tm.group(3).upper()
+                if mer == 'PM' and h != 12: h += 12
+                if mer == 'AM' and h == 12: h = 0
+                return datetime(ev_year, month, day, h, mn)
+        # No time: keep visible all day, remove next day
+        return datetime(ev_year, month, day, 23, 59)
     except ValueError:
         return None
 
@@ -249,12 +262,12 @@ def load_all_events():
         all_events.extend(events)
         skipped = f"  ({len(sold_out)} sold out skipped)" if sold_out else ""
         print(f"  Loaded {len(events):>3} events from {src['file']}{skipped}")
-    # Drop events whose last date has already passed
-    today = date.today()
+    # Drop events that started more than 1 hour ago
+    cutoff = datetime.now() - timedelta(hours=1)
     before = len(all_events)
     all_events = [
         e for e in all_events
-        if (_event_end_date(e.get('date', '')) or date.max) >= today
+        if (_event_end_datetime(e.get('date', ''), e.get('time', '')) or datetime.max) >= cutoff
     ]
     removed = before - len(all_events)
     if removed:
