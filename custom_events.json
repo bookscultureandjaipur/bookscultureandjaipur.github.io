@@ -2,9 +2,9 @@
   {
     "_id": "38efd9b6",
     "_source": "instagram",
-    "title": "\"Whatâ€™s That Bird? â€” A 2-day birdwatching workshop for beginners & curious minds!",
+    "title": "Whats that bird? A 2 Day Bird Spotting Workshop",
     "city": "Jaipur",
-    "date": "Sat, 4 Jul 2026",
+    "date": "Sat, 4 Jul 2026 - Sun, 5 Jul 2026",
     "time": "8:30 AM",
     "venue": "Kishanbagh Sandunes Park",
     "price": "",
@@ -12,6 +12,8 @@
     "language": "Hindi, English",
     "link": "https://wa.me/917014563426",
     "phone": "7014563426",
+    "form_link": "",
+    "email": "",
     "image": "images/custom_f4dffe35.jpg",
     "caption_full": "108 likes, 4 comments - dinkarsamore on June 30, 2026: \"Whatâ€™s That Bird? â€” \nA 2-day birdwatching workshop for beginners & curious minds! \n\nThis 2-day workshop is designed to introduce you to the wonderful world of birds, birdwatching as a hobby, and help you identify species commonly seen around Jaipur city.\n\nAt Kishan Bagh Sand Dunes Park, Jaipur | On 4th & 5th July | Between 6:30â€“8:30 AM | Walks, ID tips, & more\n\nLimited seats available! To register & know more, Dm or WhatsApp me: 7014563426\".",
     "_city": "Jaipur"
@@ -141,6 +143,25 @@
     "email": "",
     "image": "images/custom_09ace77a.png",
     "caption_full": "UDBHAV 2026 is a celebration of artistic expression, where every canvas tells a unique story.\n\nJoin us for a two-day exhibition showcasing original works by emerging artists from the Certificate Programme in Painting at the Indian Institute of Crafts & Design.\n\n📍 Surekh Art Gallery, Jawahar Kala Kendra (JKK), Jaipur\n📅 4–5 July 2026\n🕙 10:00 AM – 7:00 PM\nInauguration: 4 July • 11:00 AM\n\nCome, experience the beauty of colour, form, and imagination.\n\n#UDBHAV2026 #IICD #PaintingExhibition #ArtExhibition #Jaipur JKK IndianArt EmergingArtists FineArts CreativeJourney ArtLovers JaipurEvents CanvasStories IndianInstituteOfCraftsAndDesign\".",
+    "_city": "Jaipur"
+  },
+  {
+    "_source": "instagram",
+    "title": "Rama Heritage Walk",
+    "city": "Jaipur",
+    "date": "Sun, 5 Jul 2026",
+    "time": "6:30 AM",
+    "venue": "Meeting Point : Choti Chaupar",
+    "price": "FREE",
+    "duration": "",
+    "language": "",
+    "link": "https://www.instagram.com/p/DaSxGnIGeqv/?img_index=1",
+    "phone": "",
+    "form_link": "",
+    "email": "",
+    "image": "images/custom_06c1226f.png",
+    "caption_full": "\"Every street has a story. Every creator sees it differently. 🏛️✨\n\nJoin the RAMA Heritage Walk as we explore the timeless charm of Jaipur—through art, architecture, conversations, and creativity.\n\n📍 Route: Choti Chaupar → Sarga Suli → City Palace → Govind Dev Ji Temple → Hawa Mahal → Samrat Kachori\n\n🗓️ 5th July 2026\n⏰ 6:30 AM\n\nBring your camera, sketchbook, or simply your curiosity. Let's walk, connect, and create together.\n\n#RAMA #HeritageWalk #Jaipur #WalkConnectCreate #CreativeCommunity\".",
+    "_id": "98fd5f26",
     "_city": "Jaipur"
   }
 ]
